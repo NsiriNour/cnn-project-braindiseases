@@ -121,6 +121,28 @@ nav{
     flex:0.8;
 }
 
+.sidebar-links{
+        margin:20px 20px 0;
+        margin-top:auto;
+        gap:8px;
+        width:100%;
+        align-items:flex-start;
+    }
+
+    .sidebar-link{
+        display:block;
+        padding:10px 0;
+        text-decoration:none;
+        text-align:left;
+        font-weight:700;
+        font-size:15px;
+        color:var(--accent-cyan);
+        background:none;
+        border:none;
+        width:auto;
+        max-width:220px;
+        margin:0;
+    }
 .nav-item{
     padding:16px 20px;
     background:rgba(42,167,255,0.05);
@@ -266,6 +288,10 @@ nav{
 }
 
 .upload-prompt::after{
+    display:none;
+}
+
+.upload-prompt.loading::after{
     content:'';
     position:absolute;
     bottom:30px;
@@ -343,6 +369,10 @@ nav{
             <button class="nav-item">STROKE DETECT</button>
             <button class="nav-item">ALZHEIMER DETECT</button>
         </nav>
+        <div class="sidebar-links">
+            <a class="sidebar-link" href="faq.html">FAQ</a>
+            <a class="sidebar-link" href="contact.html">Contact</a>
+        </div>
     </aside>
 
     <main class="viewport">
@@ -368,8 +398,6 @@ nav{
 </div>
 
 <script>
-let currentDetectionType = 'tumor';
-
 function createParticles(){
     const viewport=document.querySelector('.viewport');
 
@@ -384,19 +412,34 @@ function createParticles(){
     }
 }
 
-// Handle nav items
+// Handle nav items - now they navigate to results if available
 document.querySelectorAll('.nav-item').forEach((btn, index)=>{
-    btn.addEventListener('click',e=>{
-        document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-        e.target.classList.add('active');
+    btn.addEventListener('click', e => {
+        const allResults = JSON.parse(sessionStorage.getItem('allResults') || '{}');
+        if (!allResults.results) {
+            alert('Please upload an MRI scan first');
+            return;
+        }
         
-        // Set detection type
-        if(index === 0) currentDetectionType = 'tumor';
-        else if(index === 1) currentDetectionType = 'stroke';
-        else if(index === 2) currentDetectionType = 'alzheimer';
+        // Store specific result for the page
+        let resultKey = 'tumor';
+        let page = 'brainTumor.html';
+        if (index === 1) {
+            resultKey = 'stroke';
+            page = 'brainStrock.html';
+        } else if (index === 2) {
+            resultKey = 'alzheimer';
+            page = 'alzheimer.html';
+        }
         
-        // Open file picker directly
-        fileInput.click();
+        const specificResult = allResults.results[resultKey];
+        if (specificResult && !specificResult.error) {
+            sessionStorage.setItem('detectionResult', JSON.stringify(specificResult));
+            sessionStorage.setItem('uploadedImageData', sessionStorage.getItem('uploadedImageData'));
+            window.location.href = page;
+        } else {
+            alert(`Error loading ${resultKey} results: ${specificResult?.error || 'No results available'}`);
+        }
     });
 });
 
@@ -404,9 +447,16 @@ document.querySelectorAll('.nav-item').forEach((btn, index)=>{
 const fileInput = document.getElementById('fileInput');
 const uploadPrompt = document.getElementById('uploadPrompt');
 const uploadZone = document.querySelector('.upload-zone');
+let analysisComplete = false;
 
-// Click to upload
+// Click to upload or refresh for new scan
 uploadPrompt.addEventListener('click', () => {
+    if (analysisComplete) {
+        sessionStorage.removeItem('allResults');
+        sessionStorage.removeItem('uploadedImageData');
+        window.location.reload();
+        return;
+    }
     fileInput.click();
 });
 
@@ -454,9 +504,10 @@ async function handleImageUpload(file){
     }
 
     // Show loading state
-    uploadPrompt.innerHTML = '<div style="font-size:18px; font-weight:600;">⏳ Analyzing MRI Scan...</div>';
+    uploadPrompt.innerHTML = '<div style="font-size:18px; font-weight:600;">⏳ Analyzing MRI Scan with all models...</div>';
     uploadPrompt.style.pointerEvents = 'none';
     uploadPrompt.style.opacity = '0.7';
+    uploadPrompt.classList.add('loading');
 
     // Read image as base64 for display
     const reader = new FileReader();
@@ -468,14 +519,9 @@ async function handleImageUpload(file){
         formData.append('image', file);
 
         try {
-            // Send to backend - determine correct endpoint
-            let endpoint = '/predict/tumor';
-            if(currentDetectionType === 'stroke') endpoint = '/predict/tumor'; // Use tumor detection for stroke
-            else if(currentDetectionType === 'alzheimer') endpoint = '/predict/alzheimer';
+            console.log('Uploading to: http://localhost:5000/predict/all');
             
-            console.log(`Uploading to: http://localhost:5000${endpoint}`);
-            
-            const response = await fetch(`http://localhost:5000${endpoint}`, {
+            const response = await fetch('http://localhost:5000/predict/all', {
                 method: 'POST',
                 body: formData
             });
@@ -493,18 +539,17 @@ async function handleImageUpload(file){
             }
 
             // Store results and image data
-            sessionStorage.setItem('detectionResult', JSON.stringify(result));
+            sessionStorage.setItem('allResults', JSON.stringify(result));
             sessionStorage.setItem('uploadedImageData', imageData);
             
-            // Redirect to results page
-            let resultPage = 'brainTumor.html';
-            if(currentDetectionType === 'stroke') resultPage = 'brainStrock.html';
-            else if(currentDetectionType === 'alzheimer') resultPage = 'alzheimer.html';
+            // Update nav buttons with probabilities
+            updateNavButtons(result.results);
             
-            console.log(`Redirecting to: ${resultPage}`);
-            setTimeout(() => {
-                window.location.href = resultPage;
-            }, 500);
+            // Change upload prompt to success
+            uploadPrompt.innerHTML = '<div style="font-size:18px; font-weight:600; color:#009966;">✅ Analysis Complete</div><p style="margin-top:10px;">Click on a disease button to view detailed results</p>';
+            uploadPrompt.style.pointerEvents = 'auto';
+            uploadPrompt.classList.remove('loading');
+            analysisComplete = true;
 
         } catch(error){
             console.error('Upload error:', error);
@@ -513,6 +558,7 @@ async function handleImageUpload(file){
             uploadPrompt.innerHTML = '<span class="tech-text">AI MEDICAL SYSTEM READY</span><p>UPLOAD MRI SCAN</p><small>Drop PNG / JPG / DICOM files or click to browse</small>';
             uploadPrompt.style.pointerEvents = 'auto';
             uploadPrompt.style.opacity = '1';
+            uploadPrompt.classList.remove('loading');
             
             // Show error message
             alert(`❌ Error: ${error.message}\n\nMake sure the backend server is running on http://localhost:5000`);
@@ -522,7 +568,46 @@ async function handleImageUpload(file){
     reader.readAsDataURL(file);
 }
 
-window.onload=createParticles;
+function updateNavButtons(results) {
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    // Tumor: sick_probability = 1 - probability_of_no_tumor
+    if (results.tumor && !results.tumor.error) {
+        const sickProb = Math.round(results.tumor.sick_probability * 100);
+        navItems[0].innerHTML = `TUMOR DETECT<br><small style="font-size:12px; opacity:0.8;">${sickProb}% probability</small>`;
+        navItems[0].style.background = sickProb > 50 ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 150, 102, 0.1)';
+        navItems[0].title = `Disease probability: ${sickProb}% (1 - probability of being normal)`;
+    }
+    
+    // Stroke: sick_probability = 1 - probability_of_no_stroke
+    if (results.stroke && !results.stroke.error) {
+        const sickProb = Math.round(results.stroke.sick_probability * 100);
+        navItems[1].innerHTML = `STROKE DETECT<br><small style="font-size:12px; opacity:0.8;">${sickProb}% probability</small>`;
+        navItems[1].style.background = sickProb > 50 ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 150, 102, 0.1)';
+        navItems[1].title = `Disease probability: ${sickProb}% (1 - probability of being normal)`;
+    }
+    
+    // Alzheimer: sick_probability = 1 - probability_of_no_impairment
+    if (results.alzheimer && !results.alzheimer.error) {
+        const sickProb = Math.round(results.alzheimer.sick_probability * 100);
+        navItems[2].innerHTML = `ALZHEIMER DETECT<br><small style="font-size:12px; opacity:0.8;">${sickProb}% probability</small>`;
+        navItems[2].style.background = sickProb > 50 ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 150, 102, 0.1)';
+        navItems[2].title = `Disease probability: ${sickProb}% (1 - probability of being normal)`;
+    }
+}
+
+window.onload = function() {
+    createParticles();
+    
+    // Check if we have previous results
+    const allResults = JSON.parse(sessionStorage.getItem('allResults') || '{}');
+    if (allResults.results) {
+        updateNavButtons(allResults.results);
+        uploadPrompt.innerHTML = '<div style="font-size:18px; font-weight:600; color:#009966;">✅ Analysis Complete</div><p style="margin-top:10px;">Click on a disease button to view detailed results</p>';
+        uploadPrompt.style.pointerEvents = 'auto';
+        analysisComplete = true;
+    }
+};
 </script>
 
 </body>

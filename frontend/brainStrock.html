@@ -156,8 +156,10 @@ h2{
         <h2>Stroke Result</h2>
 
         <div class="status" id="diagnosisStatus">
-            Brain Tumor Detected
+            Stroke Result
         </div>
+
+        <p id="strokeTypeInfo" style="margin-top:10px; font-size:16px; color:#2a7eff; display:none;"></p>
 
         <p><b>Model Confidence</b></p>
 
@@ -218,11 +220,19 @@ window.onload = function() {
 
     // Update diagnosis status
     const confidencePercent = Math.round(result.confidence * 100);
-    const isDanger = confidencePercent > 60 && result.prediction.toLowerCase().includes('tumor');
+    const isDanger = confidencePercent > 60 && result.prediction.toLowerCase().includes('stroke');
     const statusClass = isDanger ? 'danger' : 'safe';
     const diagnosisStatus = document.getElementById('diagnosisStatus');
     diagnosisStatus.textContent = result.prediction;
     diagnosisStatus.className = 'status ' + statusClass;
+
+    const strokeTypeInfo = document.getElementById('strokeTypeInfo');
+    if (result.stroke_type) {
+        strokeTypeInfo.textContent = `Type: ${result.stroke_type}`;
+        strokeTypeInfo.style.display = 'block';
+    } else {
+        strokeTypeInfo.style.display = 'none';
+    }
 
     // Update confidence gauge
     const confidenceGauge = document.getElementById('confidenceGauge');
@@ -258,6 +268,7 @@ window.onload = function() {
 NeuroLens - Medical Report
 ========================================
 Prediction: ${result.prediction}
+${result.stroke_type ? `Stroke Type: ${result.stroke_type}\n` : ''}
 Confidence: ${confidencePercent}%
 Classification: ${result.class_index}
 

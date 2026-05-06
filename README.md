@@ -1,203 +1,155 @@
 # NeuroLens - AI Medical Imaging Analysis Platform
 
-A comprehensive deep learning system for automated detection and classification of neurological conditions using medical imaging. This platform includes brain tumor detection, Alzheimer's disease classification, and an interactive web application for clinical decision support.
+A deep learning system for automated neurological imaging classification with a Flask backend and a browser-based frontend.
 
 ## 🎯 Project Overview
 
-NeuroLens combines state-of-the-art CNN models with a user-friendly web interface to provide:
-- **Brain Tumor Classification**: Binary (tumor/healthy) and multi-class (glioma/meningioma/pituitary/none) detection
-- **Alzheimer's Disease Staging**: Classification into No Impairment, Very Mild, Mild, and Moderate stages
-- **Real-time Inference**: GPU-accelerated prediction with confidence scores
-- **Clinical Interface**: Web application for easy image upload and result visualization
+NeuroLens provides:
+- **Brain tumor detection** with binary and tumor subtype classification
+- **Alzheimer's disease staging** using an EfficientNet B0-based model
+- **Stroke detection** with binary and stroke-type predictions
+- **Integrated web frontend** for image upload and inference
+- **Grad-CAM heatmap support** for model explainability
 
-## 📂 Project Structure
+## 📂 Workspace Structure
 
 ```
-NeuroLens/
-│
-├── cnn/                              # Web Application (Flask + Frontend)
-│   ├── backend/
-│   │   ├── app.py                   # Main Flask application
-│   │   ├── app1.py                  # Alternative backend implementation
-│   │   ├── requirements.txt         # Python dependencies
-│   │   ├── model_a_binary.pth       # Binary tumor classification model
-│   │   ├── model_b_3class.pth       # Multi-class tumor model
-│   │   ├── uploads/                 # Temporary image storage
-│   │   └── test_upload.py           # Upload testing script
-│   └── frontend/
-│       ├── index.html               # Main upload interface
-│       ├── brainTumor.html          # Brain tumor results page
-│       ├── alzheimer.html           # Alzheimer's results page
-│       ├── brainStroke.html         # Stroke detection page
-│       ├── tumor.js                 # Brain tumor JavaScript logic
-│       └── index.css                # Shared styles
-│
-└── cnn-project/                      # Training & Model Development
-    ├── train.ipynb                  # Brain tumor training notebook
-    ├── train_alzheimer.ipynb        # Alzheimer's training notebook
-    ├── pg.ipynb                     # Data exploration notebook
-    ├── weights_scratch_a.pt         # Training weights checkpoint
-    │
-    ├── models/
-    │   ├── model.py                 # Brain tumor CNN architecture
-    │   ├── model_alzheimer.py       # Alzheimer's CNN architecture
-    │   ├── train_utils.py           # Brain tumor training utilities
-    │   ├── train_utils_alzheimer.py # Alzheimer's training utilities
-    │   ├── model_a_binary.pth       # Trained binary classifier
-    │   └── efficientnet_b0_alzheimer.pt # EfficientNet Alzheimer's model
-    │
-    ├── data/
-    │   ├── data_loader.py           # Brain tumor data loading
-    │   ├── data_loader_alzheimer.py # Alzheimer's data loading
-    │   └── DATASET/
-    │       ├── alz/                 # Alzheimer's dataset (train/test split)
-    │       │   └── Combined Dataset/
-    │       │       ├── train/       # Training images
-    │       │       │   ├── No Impairment/
-    │       │       │   ├── Very Mild Impairment/
-    │       │       │   ├── Mild Impairment/
-    │       │       │   └── Moderate Impairment/
-    │       │       └── test/        # Test images (same classes)
-    │       └── classification/      # Brain tumor dataset
-    │           ├── Training/
-    │           │   ├── glioma/
-    │           │   ├── meningioma/
-    │           │   ├── notumor/
-    │           │   └── pituitary/
-    │           └── Testing/
-    │               ├── glioma/
-    │               ├── meningioma/
-    │               ├── notumor/
-    │               └── pituitary/
-    │
-    ├── results/
-    │   └── alzheimer/
-    │       └── results_alzheimer.json  # Training results & metrics
-    │
-    └── utils/
-        └── helpers.py               # Utility functions
+cnn/
+├── backend/
+│   ├── app2.py                 # Primary Flask inference server
+│   ├── app1.py                 # Alternative backend implementation
+│   ├── requirements.txt        # Backend dependencies
+│   ├── models/                 # Saved PyTorch model weights
+│   │   ├── efficientnet_b0_alzheimer.pt
+│   │   ├── model_a_binary.pth
+│   │   ├── model_a_stroke.pth
+│   │   ├── model_b_3class.pth
+│   │   └── model_b_stroketype.pth
+│   ├── uploads/                # Temporary uploaded files
+│   ├── pg.ipynb                # Prototype notebook
+│   ├── test_upload.py          # Upload endpoint tester
+│   └── test_write.txt          # Test file output sample
+└── frontend/
+    ├── index.html              # Main upload UI
+    ├── brainTumor.html         # Brain tumor results page
+    ├── alzheimer.html          # Alzheimer's results page
+    ├── brainStroke.html        # Stroke prediction page
+    ├── index.css               # Shared page styles
+    └── tumor.js                # Frontend logic for uploads/results
 ```
+
+## 🧠 Backend Overview
+
+The current Flask server is implemented in `cnn/backend/app2.py` and exposes the following endpoints:
+
+- `POST /predict/tumor`
+- `POST /predict/alzheimer`
+- `POST /predict/stroke`
+- `GET /health`
+
+The backend loads PyTorch models from `cnn/backend/models/` and does image preprocessing with torchvision transforms.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.8+
-- PyTorch with CUDA support (optional but recommended)
+- PyTorch 2.x
 - Flask
-- OpenCV
-- PIL/Pillow
+- Flask-CORS
+- Pillow
+- NumPy
+- torchvision
 
 ### Backend Setup
 
 ```bash
-# Navigate to backend directory
 cd cnn/backend
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Run the Flask server
-python app.py
+python app2.py
 ```
 
-The backend will be available at `http://localhost:5000`
+The Flask server starts on `http://127.0.0.1:5000`.
 
 ### Frontend Setup
 
-**Option 1: Direct Browser Access**
+Open `cnn/frontend/index.html` in your browser, or serve the frontend directory with a local HTTP server:
+
 ```bash
-# Simply open the file in your browser
-start cnn/frontend/index.html
+cd cnn/frontend
+python -m http.server 8000
 ```
 
-**Option 2: Local Web Server (Recommended)**
-```bash
-# Using Python 3
-python -m http.server 8000 --directory cnn/frontend
+Then visit `http://localhost:8000`.
 
-# Visit: http://localhost:8000
-```
+## 🔌 API Details
 
-## 🧠 Model Architecture & Specifications
+### Tumor Prediction
 
-### Brain Tumor Detection
+`POST /predict/tumor`
+- Form field: `image`
+- Returns:
+  - `prediction`
+  - `class_index`
+  - `confidence`
+  - `probabilities`
+  - `tumor_type`
+  - `tumor_type_confidence`
+  - `tumor_type_probabilities`
+  - `heatmap`
 
-**Binary Classification Model (model_a_binary.pth)**
-- **Task**: Healthy vs Tumor
-- **Input**: 224×224 RGB images
-- **Architecture**:
-  - 3 Convolutional blocks with ReLU activation
-  - Adaptive average pooling
-  - 2-layer classifier head with dropout
-- **Dataset**: Brain tumor classification dataset (4 tumor types)
-- **Performance**: Binary classification with confidence scores
+### Alzheimer Prediction
 
-**Multi-class Classification Model (model_b_3class.pth)**
-- **Task**: Tumor type classification
-- **Classes**: Glioma, Meningioma, Pituitary tumor, No tumor
-- **Architecture**: Same as binary model
-- **Input Preprocessing**: 
-  - Resize to 224×224
-  - Convert to RGB (3 channels)
-  - Normalize with ImageNet statistics
+`POST /predict/alzheimer`
+- Form field: `image`
+- Returns:
+  - `prediction`
+  - `class_index`
+  - `confidence`
+  - `probabilities`
+  - `heatmap`
 
-### Alzheimer's Disease Classification (EfficientNet B0)
+### Stroke Prediction
 
-- **Task**: Disease staging classification
-- **Classes**: No Impairment, Very Mild, Mild, Moderate
-- **Architecture**: EfficientNet-B0 backbone
-- **Dataset**: Combined Alzheimer's MRI dataset
-- **Model File**: `efficientnet_b0_alzheimer.pt`
-- **Results**: Saved in `cnn-project/results/alzheimer/results_alzheimer.json`
+`POST /predict/stroke`
+- Form field: `image`
+- Returns:
+  - `prediction`
+  - `class_index`
+  - `confidence`
+  - `probabilities`
+  - `stroke_type`
+  - `stroke_type_confidence`
+  - `stroke_type_probabilities`
+  - `heatmap`
 
-## 🔌 API Endpoints
+### Health Check
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/detect-tumor` | Brain tumor detection using binary & multi-class models |
-| POST | `/detect-alzheimer` | Alzheimer's disease classification |
-| POST | `/detect-stroke` | Stroke detection (planned) |
-| GET | `/health` | Server health check |
+`GET /health`
+- Returns server status, device, and model load state.
 
-### Request Format (Multipart Form Data)
-```
-POST /detect-tumor
-- file: [image_file]
-- Returns: {
-    "binary_prediction": "tumor/healthy",
-    "binary_confidence": 0.95,
-    "class_prediction": "glioma",
-    "class_confidence": 0.92,
-    "class_probabilities": {...}
-  }
-```
+## 📊 Image Preprocessing
 
-## 📊 Image Processing Pipeline
+Input images are processed using:
+- Resize to 256
+- Center crop to 224×224
+- RGB conversion
+- ImageNet normalization
 
-All input images undergo automatic processing:
+## 📌 Notes
 
-1. **Format Conversion**: Ensure RGB format (3 channels)
-2. **Resizing**: Scale to 224×224 pixels using interpolation
-3. **Normalization**: Apply ImageNet normalization:
-   - Mean: [0.485, 0.456, 0.406]
-   - Std: [0.229, 0.224, 0.225]
-4. **Tensor Conversion**: Convert to PyTorch tensors
-5. **Inference**: Feed to GPU/CPU models
+- The server detects CUDA automatically and uses GPU when available.
+- `cnn/backend/app2.py` is the current inference entrypoint.
+- Model weights must exist in `cnn/backend/models/` or the backend directory.
 
-## ✨ Features
+## 📦 Backend Dependencies
 
-### Frontend
-- ✅ Drag & drop file upload interface
-- ✅ Click-to-browse file selector
-- ✅ Real-time inference with loading indicators
-- ✅ Confidence score display
-- ✅ Probability breakdown visualization
-- ✅ Patient/Study metadata input
-- ✅ Report generation & download
-- ✅ Multi-condition support (tumor, Alzheimer's, stroke)
-
-### Backend
-- ✅ GPU support (automatic CUDA detection)
+`cnn/backend/requirements.txt` includes:
+- Flask==2.3.3
+- Flask-CORS==4.0.0
+- torch==2.6.0
+- torchvision==0.21.0
+- Pillow==10.0.0
+- numpy==1.24.3
 - ✅ CORS enabled for cross-origin requests
 - ✅ Error handling & validation
 - ✅ Model loading optimization
