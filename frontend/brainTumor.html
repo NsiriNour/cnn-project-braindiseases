@@ -221,14 +221,7 @@ window.onload = function() {
     const isDanger = confidencePercent > 60 && result.prediction.toLowerCase().includes('tumor');
     const statusClass = isDanger ? 'danger' : 'safe';
     const diagnosisStatus = document.getElementById('diagnosisStatus');
-    
-    // Show tumor type if present
-    let statusText = result.prediction;
-    if(result.class_index === 1 && result.tumor_type) {
-        statusText += `<br><small style="font-size:14px; margin-top:5px; display:block; opacity:0.85;">Type: ${result.tumor_type.charAt(0).toUpperCase() + result.tumor_type.slice(1)}</small>`;
-    }
-    
-    diagnosisStatus.innerHTML = statusText;
+    diagnosisStatus.textContent = result.prediction;
     diagnosisStatus.className = 'status ' + statusClass;
 
     // Update confidence gauge
@@ -240,40 +233,11 @@ window.onload = function() {
     const probabilitiesContainer = document.getElementById('probabilitiesContainer');
     probabilitiesContainer.innerHTML = '';
     
-    // Show binary probabilities (Tumor Present / Not Present)
     if(result.probabilities) {
-        // Add a section title
-        const binaryTitle = document.createElement('p');
-        binaryTitle.innerHTML = '<b style="color:#2aa7ff;">Binary Classification:</b>';
-        binaryTitle.style.marginTop = '0';
-        probabilitiesContainer.appendChild(binaryTitle);
-        
         Object.entries(result.probabilities).forEach(([label, prob]) => {
             const percentage = Math.round(prob * 100);
             const p = document.createElement('p');
             p.textContent = label;
-            probabilitiesContainer.appendChild(p);
-            
-            const barDiv = document.createElement('div');
-            barDiv.className = 'bar';
-            const span = document.createElement('span');
-            span.style.width = percentage + '%';
-            barDiv.appendChild(span);
-            probabilitiesContainer.appendChild(barDiv);
-        });
-    }
-    
-    // Show tumor type probabilities if tumor is present
-    if(result.class_index === 1 && result.tumor_type_probabilities) {
-        const typeTitle = document.createElement('p');
-        typeTitle.innerHTML = '<b style="color:#2aa7ff; margin-top:15px;">Tumor Type Classification:</b>';
-        typeTitle.style.marginTop = '15px';
-        probabilitiesContainer.appendChild(typeTitle);
-        
-        Object.entries(result.tumor_type_probabilities).forEach(([label, prob]) => {
-            const percentage = Math.round(prob * 100);
-            const p = document.createElement('p');
-            p.textContent = label.charAt(0).toUpperCase() + label.slice(1);
             probabilitiesContainer.appendChild(p);
             
             const barDiv = document.createElement('div');
