@@ -1,0 +1,72 @@
+{
+  "disease": "Stroke",
+  "description": "Stroke Detection & Classification - Model A: Binary (Normal/Stroke), Model B: Multiclass (Bleeding/Ischemia)",
+  
+  "data": {
+    "img_size": 224,
+    "batch_size": 32,
+    "val_split": 0.15,
+    "seed": 42
+  },
+  
+  "model_a": {
+    "name": "EfficientNet-B0 (Binary)",
+    "type": "transfer_learning",
+    "architecture": "efficientnet_b0",
+    "num_classes": 2,
+    "classes": ["Normal", "Stroke"],
+    "dropout": 0.5,
+    "epochs": 20,
+    "learning_rate": 1e-4,
+    "patience": 5,
+    "weight_decay": 1e-4,
+    "purpose": "Detect presence of stroke"
+  },
+  
+  "model_b": {
+    "name": "ResNet-50 (Multiclass)",
+    "type": "transfer_learning",
+    "architecture": "resnet50",
+    "num_classes": 2,
+    "classes": ["Bleeding", "Ischemia"],
+    "dropout": 0.3,
+    "epochs": 25,
+    "learning_rate": 1e-4,
+    "patience": 5,
+    "weight_decay": 1e-4,
+    "purpose": "Classify stroke type (only on positive detections)"
+  },
+  
+  "inference": {
+    "confidence_threshold": 0.85,
+    "stroke_threshold": 0.5,
+    "cascade": true,
+    "note": "Model A -> Model B pipeline: only classify stroke type if Model A detects stroke"
+  },
+  
+  "device": "cuda",
+  "augmentation": {
+    "train": {
+      "horizontal_flip": 0.5,
+      "vertical_flip": 0.5,
+      "rotation": 15,
+      "color_jitter": {"brightness": 0.2, "contrast": 0.2}
+    }
+  },
+  
+  "imagenet_norm": {
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  },
+  "paths": {
+    "data_root": "data/DATASET/Brain_Stroke_CT_Dataset",
+    "results_root": "results/Stroke",
+    "weights_a": "results/Stroke/weights/model_a_binary.pth",
+    "weights_b": "results/Stroke/weights/model_b_multiclass.pth",
+    "history_a": "results/Stroke/history/history_a.json",
+    "history_b": "results/Stroke/history/history_b.json",
+    "plots": "results/Stroke/plots",
+    "confusion_matrix_a": "results/Stroke/confusion_matrix/confusion_matrix_a.png",
+    "confusion_matrix_b": "results/Stroke/confusion_matrix/confusion_matrix_b.png"
+  }
+}

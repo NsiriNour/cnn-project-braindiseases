@@ -1,0 +1,14 @@
+
+NeuroLens - Medical Report
+========================================
+Prediction: Tumor Present — pituitary
+Confidence: 99%
+Classification: 1
+
+Probability Breakdown:
+No Tumor: 1.30%
+Tumor Present: 98.70%
+
+========================================
+Report Generated: 5/8/2026, 9:30:19 PM
+        

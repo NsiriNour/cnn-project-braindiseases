@@ -1,0 +1,64 @@
+{
+  "disease": "Brain_Tumor",
+  "description": "Brain Tumor Classification (MRI) - Binary (Tumor/No Tumor) + 3-class (Glioma/Meningioma/Pituitary)",
+  
+  "data": {
+    "img_size": 224,
+    "batch_size": 32,
+    "val_split": 0.15,
+    "seed": 42
+  },
+  
+  "model_a": {
+    "name": "MobileNet-V2 (Binary)",
+    "type": "transfer_learning",
+    "architecture": "mobilenet_v2",
+    "num_classes": 2,
+    "classes": ["notumor", "tumor"],
+    "dropout": 0.2,
+    "epochs": 12,
+    "learning_rate": 1e-4,
+    "patience": 5,
+    "weight_decay": 1e-4
+  },
+  
+  "model_b": {
+    "name": "ResNet-50 (3-class)",
+    "type": "transfer_learning",
+    "architecture": "resnet50",
+    "num_classes": 3,
+    "classes": ["glioma", "meningioma", "pituitary"],
+    "dropout": 0.3,
+    "epochs": 25,
+    "learning_rate": 1e-4,
+    "patience": 5,
+    "weight_decay": 1e-4
+  },
+  
+  "device": "cuda",
+  "augmentation": {
+    "train": {
+      "horizontal_flip": 0.5,
+      "vertical_flip": 0.5,
+      "rotation": 15,
+      "color_jitter": {"brightness": 0.2, "contrast": 0.2}
+    }
+  },
+  
+  "imagenet_norm": {
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  },
+  "paths": {
+    "data_root": "data/DATASET/classification/Training",
+    "test_root": "data/DATASET/classification/Testing",
+    "results_root": "results/Brain_Tumor",
+    "weights_a": "results/Brain_Tumor/weights/model_a_binary.pth",
+    "weights_b": "results/Brain_Tumor/weights/model_b_3class.pth",
+    "history_a": "results/Brain_Tumor/history/history_a.json",
+    "history_b": "results/Brain_Tumor/history/history_b.json",
+    "plots": "results/Brain_Tumor/plots",
+    "confusion_matrix_a": "results/Brain_Tumor/confusion_matrix/confusion_matrix_a.png",
+    "confusion_matrix_b": "results/Brain_Tumor/confusion_matrix/confusion_matrix_b.png"
+  }
+}

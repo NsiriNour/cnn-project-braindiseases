@@ -1,0 +1,73 @@
+﻿# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+.coverage
+.coverage.*
+.cache
+htmlcov/
+
+# Virtual environments
+.env
+.envrc
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.pixi/
+__pypackages__/
+
+# Build and packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+*.egg
+*.whl
+MANIFEST
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project datasets / output artifacts
+cnn-project/data/
+cnn-project/models/
+cnn-project/results/alzheimer/weights/
+cnn-project/results/Brain_Tumor/weights/
+cnn-project/results/Stroke/weights/
+cnn-project/data/DATASET/
+*.pt
+*.pth
+*.ckpt
+*.h5
+
+# Keep project documentation tracked
+!README.md
