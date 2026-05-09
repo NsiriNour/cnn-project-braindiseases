@@ -1,0 +1,300 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NeuroLens Results</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:#f4f9ff;
+    color:#12324a;
+}
+
+/* layout */
+.container{
+    display:grid;
+    grid-template-columns:1.2fr 1fr;
+    gap:25px;
+    padding:30px;
+}
+
+/* cards */
+.card{
+    background:white;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 10px 25px rgba(0,150,255,0.08);
+    border:1px solid rgba(0,150,255,0.12);
+}
+
+/* MRI image */
+.mri img{
+    width:100%;
+    border-radius:14px;
+}
+
+/* diagnosis */
+.status{
+    font-size:20px;
+    font-weight:700;
+    padding:12px;
+    border-radius:12px;
+    text-align:center;
+    margin-top:10px;
+}
+
+.danger{
+    background:#ffe5e5;
+    color:#d10000;
+}
+
+.safe{
+    background:#e7fff1;
+    color:#009966;
+}
+
+/* gauge */
+.gauge{
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:conic-gradient(#2aa7ff 0% 94%, #e9f3ff 94%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    font-size:22px;
+    font-weight:bold;
+}
+
+/* bars */
+.bar{
+    height:10px;
+    background:#eaf3ff;
+    border-radius:50px;
+    overflow:hidden;
+    margin-bottom:10px;
+}
+
+.bar span{
+    display:block;
+    height:100%;
+    background:linear-gradient(90deg,#2aa7ff,#66c2ff);
+}
+
+/* buttons */
+.buttons{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+button{
+    flex:1;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.download{
+    background:#2aa7ff;
+    color:white;
+}
+
+.newscan{
+    background:#eaf3ff;
+    color:#2aa7ff;
+}
+
+/* title */
+h2{
+    color:#2aa7ff;
+    margin-bottom:10px;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.spinner {
+    border: 4px solid rgba(42, 167, 255, 0.1);
+    border-top: 4px solid #2aa7ff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+</head>
+
+<body id="bodyContent">
+
+<div class="container" id="resultsContainer" style="display: none;">
+
+    <!-- LEFT: MRI -->
+    <div class="card mri">
+        <h2>MRI Scan & GradCAM Analysis</h2>
+        <img id="mriImage" alt="MRI" style="width:100%; border-radius:14px; margin-bottom:10px;">
+        <img id="heatmapImage" alt="GradCAM Heatmap" style="width:100%; border-radius:14px; display:none;">
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div class="card">
+
+        <h2>Stroke Result</h2>
+
+        <div class="status" id="diagnosisStatus">
+            Stroke Result
+        </div>
+
+        <p id="strokeTypeInfo" style="margin-top:10px; font-size:16px; color:#2a7eff; display:none;"></p>
+
+        <p><b>Model Confidence</b></p>
+
+        <div class="gauge" id="confidenceGauge">
+            94%
+        </div>
+
+        <hr style="margin:20px 0; border:0; border-top:1px solid #e6f2ff;">
+
+        <h2>Probability Breakdown</h2>
+
+        <div id="probabilitiesContainer">
+            <p>Healthy</p>
+            <div class="bar"><span style="width:6%"></span></div>
+
+            <p>Brain Tumor</p>
+            <div class="bar"><span style="width:94%"></span></div>
+        </div>
+
+        <div class="buttons">
+            <button class="download" id="downloadBtn">Download Report</button>
+            <button class="newscan" id="newScanBtn">New Scan</button>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+<script>
+// Load and display results from backend
+window.onload = function() {
+    const result = JSON.parse(sessionStorage.getItem('detectionResult') || '{}');
+    const imageData = sessionStorage.getItem('uploadedImageData');
+    const bodyContent = document.getElementById('bodyContent');
+    const resultsContainer = document.getElementById('resultsContainer');
+    
+    if(!result.prediction) {
+        bodyContent.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top:20px;">No results found. Redirecting...</p></div>';
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        return;
+    }
+
+    // Display uploaded image
+    if(imageData) {
+        document.getElementById('mriImage').src = imageData;
+    }
+    
+    // Display heatmap if available
+    if(result.heatmap) {
+        const heatmapImg = document.getElementById('heatmapImage');
+        heatmapImg.src = 'data:image/png;base64,' + result.heatmap;
+        heatmapImg.style.display = 'block';
+    }
+
+    // Update diagnosis status
+    const confidencePercent = Math.round(result.confidence * 100);
+    const isDanger = confidencePercent > 60 && result.prediction.toLowerCase().includes('stroke');
+    const statusClass = isDanger ? 'danger' : 'safe';
+    const diagnosisStatus = document.getElementById('diagnosisStatus');
+    diagnosisStatus.textContent = result.prediction;
+    diagnosisStatus.className = 'status ' + statusClass;
+
+    const strokeTypeInfo = document.getElementById('strokeTypeInfo');
+    if (result.stroke_type) {
+        strokeTypeInfo.textContent = `Type: ${result.stroke_type}`;
+        strokeTypeInfo.style.display = 'block';
+    } else {
+        strokeTypeInfo.style.display = 'none';
+    }
+
+    // Update confidence gauge
+    const confidenceGauge = document.getElementById('confidenceGauge');
+    confidenceGauge.textContent = confidencePercent + '%';
+    confidenceGauge.style.background = `conic-gradient(#2aa7ff 0% ${confidencePercent}%, #e9f3ff ${confidencePercent}%)`;
+
+    // Update probability breakdown
+    const probabilitiesContainer = document.getElementById('probabilitiesContainer');
+    probabilitiesContainer.innerHTML = '';
+    
+    if(result.probabilities) {
+        Object.entries(result.probabilities).forEach(([label, prob]) => {
+            const percentage = Math.round(prob * 100);
+            const p = document.createElement('p');
+            p.textContent = label;
+            probabilitiesContainer.appendChild(p);
+            
+            const barDiv = document.createElement('div');
+            barDiv.className = 'bar';
+            const span = document.createElement('span');
+            span.style.width = percentage + '%';
+            barDiv.appendChild(span);
+            probabilitiesContainer.appendChild(barDiv);
+        });
+    }
+
+    // Show results
+    resultsContainer.style.display = 'grid';
+
+    // Handle buttons
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+        const reportText = `
+NeuroLens - Medical Report
+========================================
+Prediction: ${result.prediction}
+${result.stroke_type ? `Stroke Type: ${result.stroke_type}\n` : ''}
+Confidence: ${confidencePercent}%
+Classification: ${result.class_index}
+
+Probability Breakdown:
+${result.probabilities ? Object.entries(result.probabilities).map(([label, prob]) => `${label}: ${(prob * 100).toFixed(2)}%`).join('\n') : 'N/A'}
+
+========================================
+Report Generated: ${new Date().toLocaleString()}
+        `;
+        
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportText));
+        element.setAttribute('download', 'neuro_report.txt');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    });
+
+    document.getElementById('newScanBtn').addEventListener('click', () => {
+        sessionStorage.removeItem('detectionResult');
+        sessionStorage.removeItem('uploadedImageData');
+        window.location.href = 'index.html';
+    });
+};
+</script>
+
+</body>
+</html>
