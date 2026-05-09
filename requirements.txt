@@ -1,0 +1,12 @@
+-r backend/requirements.txt
+
+# Common data science and notebook dependencies
+pandas>=2.0.0
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+xgboost>=1.8.0
+opencv-python>=4.8.0
+jupyter>=1.0.0
+notebook>=6.5.0
+scipy>=1.11.0

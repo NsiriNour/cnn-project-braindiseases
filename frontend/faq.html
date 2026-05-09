@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroLens FAQ</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#f7fbff 0%,#8ec5f5 25%,#3a698e 55%,#44a1e8 100%);color:#12324a;min-height:100vh;}
+    .page-shell{max-width:980px;margin:0 auto;padding:40px 24px;}
+    .card{background:rgba(255,255,255,0.92);border:1px solid rgba(42,167,255,0.16);border-radius:24px;box-shadow:0 18px 45px rgba(15,73,132,0.12);padding:30px;backdrop-filter:blur(14px);}
+    h1{font-size:34px;color:#1f4f8b;margin-bottom:14px;text-align:center;letter-spacing:1px;}
+    h2{font-size:22px;color:#256797;margin-top:32px;margin-bottom:14px;}
+    p{font-size:15px;line-height:1.8;color:#33475b;margin-bottom:16px;}
+    .faq-list{margin-top:20px;}
+    .faq-item{margin-bottom:24px;}
+    .faq-item strong{display:block;font-size:16px;color:#0c3f70;margin-bottom:10px;}
+    .about-box{background:rgba(38,113,193,0.06);border:1px solid rgba(38,113,193,0.14);border-radius:18px;padding:22px;margin-top:24px;}
+    .about-box p{margin-bottom:12px;}
+    .back-link{display:inline-flex;align-items:center;gap:10px;padding:12px 20px;background:rgba(37,103,151,0.12);color:#1f4f8b;border-radius:999px;border:1px solid rgba(37,103,151,0.2);text-decoration:none;font-weight:700;margin-bottom:24px;transition:transform .2s ease,background .2s ease;}
+    .back-link:hover{transform:translateY(-2px);background:rgba(37,103,151,0.18);}
+    .contact-list{margin-top:18px;display:grid;gap:10px;}
+    .contact-list span{display:inline-flex;padding:10px 14px;border-radius:14px;background:rgba(37,103,151,0.08);color:#12324a;font-weight:600;}
+    @media(max-width:720px){.page-shell{padding:24px 16px;}.card{padding:22px;}.h1{font-size:28px;}}
+</style>
+</head>
+<body>
+<div class="page-shell">
+    <a class="back-link" href="index.html">← Back to NeuroLens</a>
+    <div class="card">
+        <h1>Frequently Asked Questions</h1>
+        <div class="faq-list">
+            <div class="faq-item">
+                <strong>What does NeuroLens detect?</strong>
+                <p>NeuroLens screens MRI images for brain tumor, stroke, and Alzheimer-related risk using multiple trained AI models.</p>
+            </div>
+            <div class="faq-item">
+                <strong>How do I use the system?</strong>
+                <p>Upload your MRI image, wait for the analysis to finish, then open the disease result pages for detailed predictions and visual GradCAM explanations.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Is this a medical diagnosis?</strong>
+                <p>No. NeuroLens is a support tool that provides AI-based screening information. Always confirm with a qualified medical professional.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Which image formats are supported?</strong>
+                <p>The interface accepts common MRI image formats such as PNG, JPG, JPEG, and DICOM where supported by the browser upload flow.</p>
+            </div>
+            <div class="faq-item">
+                <strong>Why is explainability important?</strong>
+                <p>GradCAM overlays help show which image regions influenced the model predictions, increasing transparency for each result.</p>
+            </div>
+        </div>
+        <h2>About Us</h2>
+        <div class="about-box">
+            <p>NeuroLens was built to make advanced brain imaging analysis more approachable, combining AI screening with clear results and visual evidence.</p>
+            <p>Our goal is to support doctors and patients with intelligent MRI insights while keeping the interface simple, fast, and easy to use.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Ignore saved model files
+backend/models/
+
+# Optional: ignore Python virtual environments and editor settings
+venv/
+.vscode/
+__pycache__/
+*.pyc

@@ -87,6 +87,28 @@ NeuroLens/
 - OpenCV
 - PIL/Pillow
 
+### Requirements
+Install all core dependencies from the root of this repository:
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install the backend dependencies plus common data-science and notebook packages used by the training notebooks.
+
+### GitHub Push
+If you want to publish this repository to GitHub, run:
+
+```bash
+git add .
+git commit -m "Add project files, README, and requirements"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<repo-name>.git
+git push -u origin main
+```
+
+Replace `<your-username>` and `<repo-name>` with your GitHub account and repository name.
+
 ### Backend Setup
 
 ```bash
