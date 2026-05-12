@@ -151,12 +151,14 @@ The **NeuroLens** web application was built with:
   - Upload PNG / JPG / DICOM files via drag-and-drop
   - Three dedicated modules: **Tumor Detect**, **Stroke Detect**, **Alzheimer Detect**
   - Real-time prediction with confidence scores
-![alt text](image-1.png)
-![alt text](image-2.png)
-![alt text](image-3.png)
-![alt text](image-4.png)
-![alt text](image-5.png)
-![alt text](image-6.png)
+<img width="1918" height="884" alt="image-1" src="https://github.com/user-attachments/assets/c459d3dc-17bc-42ed-a4b8-bd4cc132efbc" />
+
+<img width="1897" height="820" alt="image-2" src="https://github.com/user-attachments/assets/a7581e5b-91fc-4702-83db-cb9fa523c0f3" />
+<img width="1911" height="900" alt="image-3" src="https://github.com/user-attachments/assets/071b51ce-8dbf-4db5-8f43-a82b560498ed" />
+<img width="1682" height="904" alt="image-5" src="https://github.com/user-attachments/assets/80dcb5b7-fb0a-4f47-aef5-081a11666f61" />
+<img width="1113" height="637" alt="image-6" src="https://github.com/user-attachments/assets/576f4786-8c28-4c3e-af89-54e8bf7393d5" />
+
+
 ---
 
 ## Tech Stack
