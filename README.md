@@ -1,222 +1,440 @@
 # 🧠 NeuroLens — AI-Powered Neurological Disease Detection
 
-> **Automated Detection of Brain Tumors, Stroke & Alzheimer's Disease using Deep Learning**
-
-
-## Overview
-
-**NeuroLens** is an AI-powered clinical decision support system designed to automate the detection of three critical neurological conditions from medical imaging scans (MRI and CT). Built following the 
-
-**Core Goals:**
-- Enhance clinical decision-making with **>95% precision**
-- Reduce time-to-treatment by **80%**
-- Bridge the expert gap by bringing advanced diagnostics to every healthcare facility
+> Deep learning-based clinical decision support system for automated detection of Brain Tumors, Stroke, and Alzheimer’s Disease from MRI and CT scans.
 
 ---
 
-## Diseases & Classes
+# Overview
 
-### 🔴 Brain Tumor (MRI)
-| Class | Type | Description |
-|-------|------|-------------|
-| Glioma | Malignant | Tumor originating in brain glial cells |
-| Meningioma | Membrane | Tumor developing in brain membranes |
-| Pituitary | Gland | Tumor affecting the pituitary gland |
-| No Tumor | — | Healthy brain scan |
+**NeuroLens** is a medical imaging AI project focused on assisting the detection of major neurological diseases using deep learning and computer vision.
 
-### 🟠 Stroke (CT Scan)
-| Class | Type | Description |
-|-------|------|-------------|
-| Ischemic Stroke | Blockage | Stroke caused by blood flow blockage due to a clot or narrowed artery |
-| Hemorrhagic Stroke | Bleeding | Stroke caused by rupture of a blood vessel leading to brain bleeding |
-| Normal | — | Healthy brain scan |
+The system analyzes MRI and CT scan images to help identify:
 
-### 🟣 Alzheimer's Disease (MRI)
-| Class | Stage | Description |
-|-------|-------|-------------|
-| Very Mild Impairment | Early | Very early signs of dementia |
-| Mild Impairment | Stage 1 | Early stage cognitive impairment |
-| Moderate Impairment | Stage 2 | Intermediate disease progression |
-| No Impairment | — | No cognitive decline detected |
+* 🔴 Brain Tumors
+* 🟠 Stroke
+* 🟣 Alzheimer’s Disease
+
+The project combines:
+
+* medical image preprocessing
+* transfer learning
+* explainable AI
+* deployment engineering
+* real-time inference
+
+into a complete end-to-end AI pipeline.
+
+Unlike traditional single-model student projects, NeuroLens was designed as a multi-module diagnostic platform with separate pipelines optimized for each neurological condition.
 
 ---
 
-## Dataset
+# 🎯 Project Goals
 
-All datasets sourced from **Kaggle**:
+The objective of NeuroLens is to explore how deep learning can support faster and more accessible neurological image analysis.
 
-| Disease | Modality | Total Images | Classes | Train Split | Test Split |
-|---------|----------|-------------|---------|-------------|------------|
-| Brain Tumor | MRI | 14,064 | 4 | 11,424 | 2,622 |
-| Stroke | CT Scan | 31,046 | 3 | ~28,000 | ~3,000 |
-| Alzheimer's | MRI | 23,038 | 4 | 20,480 | 2,558 |
+Key goals included:
 
-**Key data observations:**
-- Class imbalance across diagnostic categories → addressed via augmentation
-- Scanner/site variability (domain shift) → addressed via normalization
+* Building high-performance CNN pipelines for medical imaging
+* Creating an easy-to-use diagnostic interface
+* Improving prediction interpretability using Grad-CAM
+* Exploring deployment constraints such as latency and inference speed
+* Applying industry-standard ML methodology using CRISP-DM
+
+> ⚠️ NeuroLens is a research and educational project and is **not intended for real clinical diagnosis or medical decision-making**.
 
 ---
 
-## Methodology — CRISP-DM
+# 🧬 Diseases & Classification Tasks
 
-This project strictly follows the **Cross-Industry Standard Process for Data Mining (CRISP-DM)** — a 6-phase iterative framework:
+## 🔴 Brain Tumor Detection (MRI)
 
+### Classes
+
+| Class      | Description                            |
+| ---------- | -------------------------------------- |
+| Glioma     | Tumor originating in glial brain cells |
+| Meningioma | Tumor affecting brain membranes        |
+| Pituitary  | Tumor affecting the pituitary gland    |
+| No Tumor   | Healthy brain scan                     |
+
+### Pipeline Design
+
+A cascade classification approach was used:
+
+```text
+Tumor vs No Tumor
+        ↓
+Glioma / Meningioma / Pituitary
 ```
-Business Understanding → Data Understanding → Data Preparation
-         ↑                                              ↓
-      Deployment  ←  Evaluation  ←  Modeling  ←────────┘
+
+This design improves robustness by separating coarse detection from fine-grained classification.
+
+---
+
+## 🟠 Stroke Detection (CT Scan)
+
+### Classes
+
+| Class              | Description                          |
+| ------------------ | ------------------------------------ |
+| Ischemic Stroke    | Stroke caused by blood-flow blockage |
+| Hemorrhagic Stroke | Stroke caused by brain bleeding      |
+| Normal             | Healthy scan                         |
+
+### Pipeline Design
+
+The stroke pipeline follows a two-stage cascade:
+
+```text
+Normal vs Stroke
+        ↓
+Bleeding vs Ischemic
 ```
 
-### Phase 1 — Business Understanding
-Defined the clinical problem, target diseases, and success metrics (>95% accuracy, <0.5s inference).
-
-### Phase 2 — Data Understanding
-Explored class distributions, file types (JPG, PNG, DICOM), train/test splits, and identified domain shift issues.
-
-### Phase 3 — Data Preparation
-| Step | Technique |
-|------|-----------|
-| Image Resizing | All images resized to `224×224` pixels |
-| RGB Conversion | Uniform 3-channel color format |
-| Tensor Transformation | Converted to tensors for CNN pipeline |
-| Pixel Normalization | ImageNet mean & std normalization |
-| Augmentation | Random flip (H/V), rotation (±15°), color jitter |
-
-### Phase 4 — Modeling
-Three cascade CNN pipelines were developed:
-
-- **Brain Tumor CNN** — Cascade: Binary (Tumor/No Tumor) → 3-class (Glioma/Meningioma/Pituitary)
-- **Stroke CNN** — Cascade: Binary (Normal/Stroke) → Binary (Bleeding/Ischemia)
-- **Alzheimer's CNN** — Single model: 4-class severity grading
-
-### Phase 5 — Evaluation
-Models evaluated on accuracy, precision, recall, F1-score, AUC, Grad-CAM explainability, and inference latency.
-
-### Phase 6 — Deployment
-Deployed as a web application (**NeuroLens**) with a clean interface for clinical use.
+This structure mirrors real clinical triage workflows.
 
 ---
 
-## Model Architecture
+## 🟣 Alzheimer’s Disease Classification (MRI)
 
-| Disease | Task | Best Model | Val Accuracy | Parameters | Inference |
-|---------|------|-----------|-------------|------------|-----------|
-| Brain Tumor (Binary) | Tumor vs No Tumor | ResNet-18 | **99.07%** | 11.2M | 0.31s |
-| Brain Tumor (Multi) | 3-class | EfficientNet-B0 | **97.08%** | 4.2M | 0.31s |
-| Stroke (Binary) | Normal vs Stroke | MobileNetV2 | **83.12%** | 2.2M | 0.23s |
-| Stroke (Binary) | Bleeding vs Ischemia | ResNet-18 | **81.40%** | 11.2M | 0.23s |
-| Alzheimer's | 4-class staging | EfficientNet-B0 | **93.04%** | 4.2M | 0.44s |
+### Classes
 
-**Training configuration (all models):**
-- Optimizer: Adam (`lr=1e-4`, `wd=1e-4`)
-- Loss: Cross-Entropy (+ Macro F1 for Alzheimer's)
-- Batch size: 32 | Image size: 224×224
-- Early stopping with patience
+| Class              | Description                      |
+| ------------------ | -------------------------------- |
+| Very Mild Demented | Very early cognitive impairment  |
+| Mild Demented      | Early-stage dementia             |
+| Moderate Demented  | Intermediate disease progression |
+| Non Demented       | Healthy subject                  |
+
+The Alzheimer’s pipeline uses a direct 4-class severity classification model.
 
 ---
 
-## Results
+# 📊 Dataset Information
 
-### Summary Table
-| Model | Accuracy | Precision | Recall | F1-Score |
-|-------|----------|-----------|--------|----------|
-| Brain Tumor | **97.2%** | 96.8% | 96.5% | 96.6% |
-| Stroke | **94.8%** | 93.9% | 94.2% | 94.0% |
-| Alzheimer's | **96.1%** | 95.4% | 95.7% | 95.5% |
+All datasets were sourced from Kaggle public medical imaging repositories.
 
-### Stroke — Bleeding vs Ischemia (Model B)
-- Accuracy: **97.30%** | AUC: **0.9728**
-- Bleeding F1: 0.97 | Ischemia F1: 0.97
+| Disease     | Modality | Total Images | Classes |
+| ----------- | -------- | ------------ | ------- |
+| Brain Tumor | MRI      | 14,064       | 4       |
+| Stroke      | CT Scan  | 31,046       | 3       |
+| Alzheimer’s | MRI      | 23,038       | 4       |
 
-### Alzheimer's
-- Overall accuracy: **93.04%**
-- Moderate Impairment: Perfect recall (1.0000)
-- VeryMild Impairment: 100% recall
+## Dataset Challenges
 
-### Evaluation Criteria
-- ✅ **Grad-CAM** explainability — visualizing decision regions for clinical trust
-- ✅ **Cross-validation** stability — robust performance across data folds
-- ✅ **Inference benchmarking** — latency testing for real-time PACS integration
-- ✅ **Calibration** — reliable confidence scores for clinical support
+Medical imaging datasets present several real-world challenges:
+
+* Class imbalance
+* Different scanner qualities
+* Domain shift between sources
+* Image artifacts and noise
+* Variability in patient anatomy
+
+To improve generalization, extensive preprocessing and augmentation strategies were applied.
 
 ---
 
-## Deployment
+# 🔄 Methodology — CRISP-DM
 
-The **NeuroLens** web application was built with:
+The project follows the **CRISP-DM (Cross-Industry Standard Process for Data Mining)** framework.
 
-- **Frontend:** HTML5, CSS3, JavaScript — clean, clinical-grade UI
-- **Backend:** Java — REST API serving the trained CNN models
-- **Interface Features:**
-  - Upload PNG / JPG / DICOM files via drag-and-drop
-  - Three dedicated modules: **Tumor Detect**, **Stroke Detect**, **Alzheimer Detect**
-  - Real-time prediction with confidence scores
+```text
+Business Understanding
+        ↓
+Data Understanding
+        ↓
+Data Preparation
+        ↓
+Modeling
+        ↓
+Evaluation
+        ↓
+Deployment
+```
+
+---
+
+## 1️⃣ Business Understanding
+
+The primary challenge addressed by NeuroLens is the difficulty of fast and scalable neurological image analysis.
+
+The project focused on:
+
+* assisting preliminary screening
+* reducing manual analysis workload
+* exploring AI explainability in healthcare
+* building a deployable medical imaging pipeline
+
+---
+
+## 2️⃣ Data Understanding
+
+During the exploration phase:
+
+* class distributions were analyzed
+* dataset imbalance was identified
+* image formats were standardized
+* modality differences (MRI vs CT) were studied
+* scanner variability issues were investigated
+
+---
+
+## 3️⃣ Data Preparation
+
+### Image Preprocessing Pipeline
+
+| Step              | Description                              |
+| ----------------- | ---------------------------------------- |
+| Resizing          | All images resized to 224×224            |
+| RGB Conversion    | Standardized 3-channel format            |
+| Tensor Conversion | PyTorch tensor transformation            |
+| Normalization     | ImageNet mean/std normalization          |
+| Augmentation      | Rotation, flips, jitter, transformations |
+
+### Augmentation Techniques
+
+To improve robustness and reduce overfitting:
+
+* Horizontal Flip
+* Vertical Flip
+* Random Rotation (±15°)
+* Color Jitter
+* Random Transformations
+
+---
+
+# 🧠 Deep Learning Models
+
+Multiple CNN architectures were tested and compared.
+
+| Task                       | Best Model      | Validation Accuracy |
+| -------------------------- | --------------- | ------------------- |
+| Tumor vs No Tumor          | ResNet-18       | 99.07%              |
+| Tumor Multi-Class          | EfficientNet-B0 | 97.08%              |
+| Stroke Detection           | MobileNetV2     | 83.12%              |
+| Stroke Type Classification | ResNet-18       | 81.40%              |
+| Alzheimer’s Classification | EfficientNet-B0 | 93.04%              |
+
+---
+
+# ⚙️ Training Configuration
+
+## General Configuration
+
+| Parameter     | Value         |
+| ------------- | ------------- |
+| Optimizer     | Adam          |
+| Learning Rate | 1e-4          |
+| Weight Decay  | 1e-4          |
+| Batch Size    | 32            |
+| Image Size    | 224×224       |
+| Loss Function | Cross-Entropy |
+
+Additional techniques:
+
+* Early stopping
+* Validation monitoring
+* Learning rate scheduling
+* Transfer learning from ImageNet weights
+
+---
+
+# 📈 Evaluation & Results
+
+## Final System Performance
+
+| Module      | Accuracy | Precision | Recall | F1-Score |
+| ----------- | -------- | --------- | ------ | -------- |
+| Brain Tumor | 97.2%    | 96.8%     | 96.5%  | 96.6%    |
+| Stroke      | 94.8%    | 93.9%     | 94.2%  | 94.0%    |
+| Alzheimer’s | 96.1%    | 95.4%     | 95.7%  | 95.5%    |
+
+---
+
+## Additional Evaluation Metrics
+
+The models were evaluated using:
+
+* Accuracy
+* Precision
+* Recall
+* F1-score
+* ROC-AUC
+* Inference latency
+* Grad-CAM visualization
+
+---
+
+## Explainability with Grad-CAM
+
+To improve interpretability, Grad-CAM was integrated into the prediction pipeline.
+
+This allows visualization of image regions influencing the CNN predictions.
+
+Benefits:
+
+* Better understanding of model behavior
+* Increased transparency
+* Improved trust in predictions
+* Useful educational visualization
+
+---
+
+# 🚀 Deployment
+
+NeuroLens was deployed as a web application with real-time prediction capabilities.
+
+## Features
+
+* Upload MRI/CT images
+* Drag-and-drop interface
+* Real-time inference
+* Confidence score visualization
+* Dedicated modules for each disease
+* Clean and responsive UI
+
+---
+
+# 🖥️ Application Preview
+
+## Home Interface
+
 <img width="1918" height="884" alt="image-1" src="https://github.com/user-attachments/assets/c459d3dc-17bc-42ed-a4b8-bd4cc132efbc" />
 
+---
+
+## Brain Tumor Detection
+
 <img width="1897" height="820" alt="image-2" src="https://github.com/user-attachments/assets/a7581e5b-91fc-4702-83db-cb9fa523c0f3" />
+
+---
+
+## Stroke Detection
+
 <img width="1911" height="900" alt="image-3" src="https://github.com/user-attachments/assets/071b51ce-8dbf-4db5-8f43-a82b560498ed" />
+
+---
+
+## Alzheimer’s Detection
+
 <img width="1682" height="904" alt="image-5" src="https://github.com/user-attachments/assets/80dcb5b7-fb0a-4f47-aef5-081a11666f61" />
+
+---
+
+## Prediction Output
+
 <img width="1113" height="637" alt="image-6" src="https://github.com/user-attachments/assets/576f4786-8c28-4c3e-af89-54e8bf7393d5" />
 
+---
+
+# 🛠️ Tech Stack
+
+| Layer           | Technologies                    |
+| --------------- | ------------------------------- |
+| Deep Learning   | PyTorch                         |
+| Architectures   | ResNet, EfficientNet, MobileNet |
+| Data Processing | torchvision, NumPy, PIL         |
+| Explainability  | Grad-CAM                        |
+| Backend         | Java                            |
+| Frontend        | HTML5, CSS3, JavaScript         |
+| Visualization   | Matplotlib                      |
+| Methodology     | CRISP-DM                        |
 
 ---
 
-## Tech Stack
+# 📂 Project Structure
 
-| Layer | Technology |
-|-------|-----------|
-| Deep Learning | PyTorch |
-| Model Architectures | ResNet-18/50, EfficientNet-B0, MobileNetV2 |
-| Data Processing | torchvision, NumPy, PIL |
-| Visualization | Matplotlib, Grad-CAM |
-| Backend | Java |
-| Frontend | HTML5, CSS3, JavaScript |
-| Data Source | Kaggle |
-| Methodology | CRISP-DM |
-
----
-
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/neurolens.git
-cd neurolens
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Train a model (example: brain tumor)
-python train.py --disease tumor --model efficientnet_b0 --epochs 25
-
-# Run the web application
-# Start the Java backend
-cd backend
-mvn spring-boot:run
-
-# Open frontend
-open frontend/index.html
+```text
+neurolens/
+│
+├── datasets/
+├── models/
+├── notebooks/
+├── backend/
+├── frontend/
+├── utils/
+├── train.py
+├── inference.py
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
+# ⚡ Installation
 
+## Clone Repository
 
-## Team
+```bash
+git clone https://github.com/your-username/neurolens.git
+cd neurolens
+```
 
-| Name | Role |
-|------|------|
-| **Yoldez Boubahri** | ML Engineer & Data Scientist |
-| **Abir Bouhajja** | ML Engineer & Data Scientist |
-| **Nour Nsiri** | ML Engineer & Data Scientist |
+## Install Dependencies
 
-**Supervisor:** Mr. Seif Eddine Mejri  
-**Institution:** ESSAI (École Supérieure des Sciences Appliquées et de l'Informatique)
+```bash
+pip install -r requirements.txt
+```
+
+## Train a Model
+
+Example:
+
+```bash
+python train.py --disease tumor --model efficientnet_b0 --epochs 25
+```
+
+## Run Backend
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+## Launch Frontend
+
+Open:
+
+```text
+frontend/index.html
+```
 
 ---
 
+# 🔮 Future Improvements
+
+Potential future work includes:
+
+* Full DICOM pipeline support
+* Vision Transformers (ViT)
+* 3D CNN architectures
+* Better calibration & uncertainty estimation
+* Multi-modal clinical integration
+* Cloud deployment
+* PACS integration
+* Cross-hospital validation
 
 ---
+
+# 👥 Team
+
+| Name            | Role                         |
+| --------------- | ---------------------------- |
+| Yoldez Boubahri | ML Engineer & Data Scientist |
+| Abir Bouhajja   | ML Engineer & Data Scientist |
+| Nour Nsiri      | ML Engineer & Data Scientist |
+
+### Supervisor
+
+Mr. Seif Eddine Mejri
+
+### Institution
+
+ESSAI — École Supérieure des Sciences Appliquées et de l'Informatique
+
+---
+
+# ❤️ Final Note
 
 <div align="center">
   <i>"Neurolens isn't just a project — it's a step toward a future where no patient waits too long, and no doctor stands alone."</i>
